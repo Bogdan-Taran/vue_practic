@@ -1,0 +1,1 @@
+The Vue project for pracick sprint in TomTIT by Bogdan Taran
