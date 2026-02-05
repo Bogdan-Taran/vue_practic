@@ -26,7 +26,7 @@ Vue.component('product', {
                 cart</button>
             <button v-on:click="deleteFromCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Delete from cart</button>
             <!-- <p>{{ isOnSale }}</p> -->
-            <product-review @review-submitted="addReview"></product-review>
+            
         </div>
         <div>
             <h2>Reviews</h2>
@@ -38,6 +38,7 @@ Vue.component('product', {
                     <p>{{ review.review }}</p>
                 </li>
             </ul>
+            <product-review @review-submitted="addReview"></product-review>
         </div>
     </div>
     `,
@@ -82,8 +83,9 @@ Vue.component('product', {
             this.selectedVariant = index;
             console.log(index)
         },
-        addReview() {
+        addReview(productReview) {
             this.reviews.push(productReview)
+            console.log('Событие addReview')
         }
     },
     computed: {
@@ -127,49 +129,79 @@ Vue.component('product-details', {
 Vue.component('product-review', {
     template: `
     <form class="review-form" @submit.prevent="onSubmit">
-            <p>
-                <label for="name">Name:</label>
-                <input type="text" id="name" placeholder="name" v-model="name">
+            <p v-if="errors.length">
+                <b>Please correct the following error(s):</b>
+                <ul>
+                    <li v-for="error in errors">{{error}}</li>
+                </ul>
             </p>
-            <p>
-                <label for="review">Review:</label>
-                <textarea id="review" v-model="review"></textarea>
-            </p>
-            <p>
-                <label for="rating">Rating:</label>
-                <select id="rating" v-model.number="rating">
-                    <option value="5">5</option>
-                    <option value="4">4</option>
-                    <option value="3">3</option>
-                    <option value="2">2</option>
-                    <option value="1">1</option>
-                </select>
-            </p>
-            <p>
-                <input type="submit" value="Submit">
-            </p>
-        </form>
-
+                <p>
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" placeholder="name" v-model="name">
+                </p>
+                <p>
+                    <label for="review">Review:</label>
+                    <textarea id="review" v-model="review"></textarea>
+                </p>
+                <p>
+                    <label for="rating">Rating:</label>
+                    <select id="rating" v-model.number="rating">
+                        <option value="5">5</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1</option>
+                    </select>
+                </p>
+                <p>
+                    <label for="recommend">Would you recommended this product?</label>
+                    <label>
+                        <input type="radio" name="recommend" value="yes" v-model="recommended">
+                        Да
+                    </label>
+                    <label>
+                        <input type="radio" name="recommend" value="no" v-model="recommended">
+                        Нет
+                    </label>
+                </p>
+                <p>
+                    <input type="submit" value="Submit">
+                </p>
+            </form>
     `,
     data() {
         return {
             name: null,
             review: null,
-            rating: null
+            rating: null,
+            recommended: null,
+            errors: [],
         }
     },
     methods: {
         onSubmit() {
-            let productReview = {
-                name: this.name,
-                review: this.review,
-                rating: this.rating
+            if (this.name && this.review && this.rating) {
+                let productReview = {
+                    name: this.name,
+                    review: this.review,
+                    rating: this.rating,
+                    recommended: this.recommended
+                }
+                console.log(productReview)
+                this.$emit('review-submitted', productReview)
+                console.log('Событие review-submitted')
+                this.name = null
+                this.review = null
+                this.rating = null
+                this.recommended = null
+            } else {
+                if (!this.name) this.errors.push("Name required.")
+                if (!this.review) this.errors.push("Review required.")
+                if (!this.rating) this.errors.push("Rating required.")
+                if (!this.recommended) this.errors.push("Recomendation is required")
             }
-            console.log(productReview)
-            this.$emit('review-submitted', productReview)
-            this.name = null
-            this.review = null
-            this.rating = null
+        
+
         }
     }
 })
