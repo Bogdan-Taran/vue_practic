@@ -15,9 +15,10 @@
 <body>
     <div id="app">
         <div class="cart">
-            <p>Cart({{ cart }})</p>
+            <p>Cart({{ cart.length }})</p>
         </div>
         <product :premium="premium" @add-to-cart="updateCart" @delete-from-cart="updateDeleteFromCart"></product>
+        
     </div>
 </body>
 
