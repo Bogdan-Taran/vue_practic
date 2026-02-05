@@ -21,7 +21,7 @@ Vue.component('product', {
             <ul>
                 <li v-for="detail in details">{{ detail }}</li>
             </ul>
-            <p>Shipping: {{ shipping }} </p>
+            
             <div class="color-box" v-for="(variant, index) in variants" :key="variant.variantId"
                 :style="{ backgroundColor:variant.variantColor}" @mouseover="updateProduct(index)"></div>
             
@@ -32,7 +32,7 @@ Vue.component('product', {
             
         </div>
         <div>
-            <product-tabs :reviews="reviews"></product-tabs>
+            <product-tabs :reviews="reviews" :shipping="shipping"></product-tabs>
         </div>
     </div>
     `,
@@ -207,6 +207,10 @@ Vue.component('product-tabs', {
         reviews: {
             type: Array,
             required: false,
+        },
+        shipping: {
+            type: String,
+            required: false,
         }
     },
     template:
@@ -227,11 +231,19 @@ Vue.component('product-tabs', {
             <div v-show="selectedTab === 'Make a Review'">
                 <product-review></product-review>
             </div>
+
+            <div v-show="selectedTab === 'Shipping'">
+                <p>Shipping: {{ shipping }} </p>
+            </div>
+
+            <div v-show="selectedTab === 'Details'">
+                <product-details></product-details>
+            </div>
         </div>
     `,
     data() {
         return {
-            tabs: ['Reviews', 'Make a Review'],
+            tabs: ['Reviews', 'Make a Review', 'Shipping', 'Details'],
             selectedTab: 'Reviews',
         }
     },
