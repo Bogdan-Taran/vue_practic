@@ -27,7 +27,7 @@ Vue.component('product', {
             
             <button v-on:click="addToCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Add to
                 cart</button>
-            <button v-on:click="deleteFromCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Delete from cart</button>
+            <button v-on:click="deleteFromCart" >Delete from cart</button>
             <!-- <p>{{ isOnSale }}</p> -->
             
         </div>
@@ -174,6 +174,7 @@ Vue.component('product-review', {
     },
     methods: {
         onSubmit() {
+            this.errors = []
             if (this.name && this.review && this.rating) {
                 let productReview = {
                     name: this.name,
@@ -181,6 +182,7 @@ Vue.component('product-review', {
                     rating: this.rating,
                     recommended: this.recommended
                 }
+                
                 console.log(productReview)
                 // this.$emit('review-submitted', productReview)
                 eventBus.$emit('review-submitted', productReview)
@@ -195,8 +197,7 @@ Vue.component('product-review', {
                 if (!this.rating) this.errors.push("Rating required.")
                 if (!this.recommended) this.errors.push("Recomendation is required")
             }
-
-
+        
         }
     }
 })
