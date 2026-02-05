@@ -15,15 +15,16 @@ Vue.component('product', {
             <h1>{{ title }}</h1>
             <p v-if="inStock">In stock</p>
             <p v-else>Out of stock</p>
-            <product-details></product-details>
+            <ul>
+                <li v-for="detail in details">{{ detail }}</li>
+            </ul>
             <p>Shipping: {{ shipping }} </p>
             <div class="color-box" v-for="(variant, index) in variants" :key="variant.variantId"
                 :style="{ backgroundColor:variant.variantColor}" @mouseover="updateProduct(index)"></div>
-            <div class="cart">
-                <p>Cart({{ cart }})</p>
-            </div>
+            
             <button v-on:click="addToCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Add to
                 cart</button>
+            <button v-on:click="deleteFromCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Delete from cart</button>
             <!-- <p>{{ isOnSale }}</p> -->
         </div>
     </div>
@@ -38,7 +39,7 @@ Vue.component('product', {
             altText: 'A pair of socks',
             // inStock: true,
             onSale: true,
-            
+            details: ['80% cotton', '20% polyster', 'Gender-neutral'],
             variants: [
                 {
                     variantId: 1111,
@@ -53,12 +54,16 @@ Vue.component('product', {
                     variantQuantity: 0,
                 }
             ],
-            cart: 0,
+
         }
     },
     methods: {
         addToCart() {
-            this.cart += 1
+            this.$emit('add-to-cart', this.variants[this.selectedVariant].variantId)
+            console.log('Вызвался метод addToCart')
+        },
+        deleteFromCart(){
+            this.$emit('delete-from-cart', this.variants[this.selectedVariant].variantId)
         },
         updateProduct(index) {
             this.selectedVariant = index;
@@ -78,15 +83,17 @@ Vue.component('product', {
         isOnSale() {
             return this.onSale ? 'Распродажа для ' + this.title : 'Распродажи нет'
         },
-        shipping(){
-            if(this.premium){
+        shipping() {
+            if (this.premium) {
                 return "Free"
-            } else{
+            } else {
                 return 2.99
             }
         },
     }
 })
+
+
 
 Vue.component('product-details', {
     template: `
@@ -95,7 +102,7 @@ Vue.component('product-details', {
     </ul>
     `,
     data() {
-        return{
+        return {
             details: ['80% cotton', '20% polyster', 'Gender-neutral'],
         }
     }
@@ -109,5 +116,14 @@ let app = new Vue({
     el: '#app',
     data: {
         premium: true,
+        cart: [],
+    },
+    methods: {
+        updateCart(id) {
+            this.cart.push(id)
+        },
+        updateDeleteFromCart(id){
+            this.cart.pop(id)
+        }
     }
 })
