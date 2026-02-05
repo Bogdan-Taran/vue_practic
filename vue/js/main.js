@@ -78,10 +78,11 @@ Vue.component('product', {
             console.log(index)
         },
     },
-    mounted(){
+    mounted() {
         eventBus.$on('review-submitted', productReview => {
-        this.reviews.push(productReview)
-    })},
+            this.reviews.push(productReview)
+        })
+    },
     computed: {
         title() {
             return this.brand + ' ' + this.product
@@ -182,8 +183,9 @@ Vue.component('product-review', {
                     rating: this.rating,
                     recommended: this.recommended
                 }
-                
+
                 console.log(productReview)
+                console.log(typeof (productReview.rating))
                 // this.$emit('review-submitted', productReview)
                 eventBus.$emit('review-submitted', productReview)
                 console.log('Событие review-submitted')
@@ -197,7 +199,7 @@ Vue.component('product-review', {
                 if (!this.rating) this.errors.push("Rating required.")
                 if (!this.recommended) this.errors.push("Recomendation is required")
             }
-        
+
         }
     }
 })
@@ -213,6 +215,7 @@ Vue.component('product-tabs', {
             type: String,
             required: false,
         }
+
     },
     template:
         `<div>
@@ -220,7 +223,26 @@ Vue.component('product-tabs', {
                 <span class="tab" :class="{ activeTab: selectedTab === tab }" v-for="(tab, index) in tabs" @click="selectedTab = tab">{{tab}}</span>
             </ul>
             <div v-show="selectedTab === 'Reviews'">
+                <div v-if="reviews.length">
+                    <search>
+                        <form @submit.prevent="onSearchSubmit">
+                            <label for="search-review">Search for review</label>
+                            <input type="search" id="search-review" name="query" v-model="query"/>
+                            <button class="search-button" type="submit" value="Submit">Search</button>
+                        </form>
+                    </search>
+                    <div v-if="foundReview.length">
+                    <h3>Results:</h3>
+                    <li v-for="review in foundReview">
+                            <p>{{ review.name }}</p>
+                            <p>Rating: {{ review.rating }}</p>
+                            <p>{{ review.review }}</p>
+                        </li>
+                    </div>
+                </div>
+
                 <p v-if="!reviews.length">There are no reviews yet</p>
+                <b v-if="reviews.length">Average score: {{ averageScore }}</b>
                 <ul>
                     <li v-for="review in reviews">
                         <p>{{ review.name }}</p>
@@ -246,13 +268,38 @@ Vue.component('product-tabs', {
         return {
             tabs: ['Reviews', 'Make a Review', 'Shipping', 'Details'],
             selectedTab: 'Reviews',
+            query: null,
+            searchStrings: [],
+            foundReview: [],
         }
     },
     methods: {
-        // addReview(productReview) {
-        //     this.reviews.push(productReview)
-        //     console.log('Событие addReview')
-        // }
+        onSearchSubmit(){
+            this.foundReview = []
+            console.log('Сработало событие поиска')
+            console.log('Query:', this.query)
+            for(review in this.reviews){
+                this.searchStrings.push(`${this.reviews[review].name}${this.reviews[review].review}${this.reviews[review].rating}${this.reviews[review].recommended}`)
+                console.log('Строчка поиска:', this.searchStrings[review])
+                if(this.searchStrings[review].includes(this.query)){
+                    this.foundReview.push(this.reviews[review])
+                }
+            }
+            console.log(this.searchStrings)
+            console.log(this.foundReview)
+
+            this.query = null
+        }
+    },
+    computed: {
+        averageScore() {
+            let entireScore = 0
+            for (review in this.reviews) {
+                entireScore += this.reviews[review].rating
+            }
+            entireScore /= this.reviews.length
+            return entireScore.toFixed(1)
+        }
     }
 })
 
