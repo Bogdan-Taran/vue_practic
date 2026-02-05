@@ -26,11 +26,6 @@ let app = new Vue({
         addToCart(){
             this.cart += 1
         },
-        deleteFromCart(){
-            if(this.cart >= 1){
-                this.cart -= 1
-            }
-        },
         updateProduct(variantImage){
             this.image = variantImage
         }
