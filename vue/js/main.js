@@ -32,7 +32,7 @@ Vue.component('product', {
             
         </div>
         <div>
-            <product-tabs :reviews="reviews" :shipping="shipping"></product-tabs>
+            <product-tabs :shipping="shipping" :variants="variants" :selectedVariant="selectedVariant" :averageScore="averageScore"></product-tabs>
         </div>
     </div>
     `,
@@ -53,12 +53,14 @@ Vue.component('product', {
                     variantColor: 'green',
                     variantImage: './assets/vmSocks-green-onWhite.jpg',
                     variantQuantity: 10,
+                    reviews: [],
                 },
                 {
                     variantId: 1112,
                     variantColor: 'blue',
                     variantImage: './assets/vmSocks-blue-onWhite.jpg',
                     variantQuantity: 0,
+                    reviews: [],
                 }
             ],
             reviews: [],
@@ -80,7 +82,9 @@ Vue.component('product', {
     },
     mounted() {
         eventBus.$on('review-submitted', productReview => {
-            this.reviews.push(productReview)
+            this.variants[this.selectedVariant].reviews.push(productReview)
+            console.log(`Добавлен отзыл для ${this.variants[this.selectedVariant].variantImage}`)
+            // this.reviews.push(productReview)
         })
     },
     computed: {
@@ -103,6 +107,18 @@ Vue.component('product', {
                 return 2.99
             }
         },
+        averageScore() {
+            let entireScore = 0
+            const reviews = this.variants[this.selectedVariant].reviews
+            for (const review in reviews) {
+                console.log("Печатаю отзыв ",review)
+                entireScore += reviews[review].rating
+                console.log(entireScore)
+            }
+            entireScore /= this.variants[this.selectedVariant].reviews.length
+            console.log(entireScore)
+            return entireScore.toFixed(1)
+        }
     }
 })
 
@@ -207,8 +223,16 @@ Vue.component('product-review', {
 
 Vue.component('product-tabs', {
     props: {
-        reviews: {
+        variants: {
             type: Array,
+            required: false,
+        },
+        selectedVariant: {
+            type: Number,
+            required: false,
+        },
+        averageScore: {
+            type: Number,
             required: false,
         },
         shipping: {
@@ -223,7 +247,7 @@ Vue.component('product-tabs', {
                 <span class="tab" :class="{ activeTab: selectedTab === tab }" v-for="(tab, index) in tabs" @click="selectedTab = tab">{{tab}}</span>
             </ul>
             <div v-show="selectedTab === 'Reviews'">
-                <div v-if="reviews.length">
+                <div v-if="variants[selectedVariant].reviews.length">
                     <search>
                         <form @submit.prevent="onSearchSubmit">
                             <label for="search-review">Search for review</label>
@@ -241,10 +265,10 @@ Vue.component('product-tabs', {
                     </div>
                 </div>
 
-                <p v-if="!reviews.length">There are no reviews yet</p>
-                <b v-if="reviews.length">Average score: {{ averageScore }}</b>
+                <p v-if="!variants[selectedVariant].reviews.length">There are no reviews yet</p>
+                <b v-if="variants[selectedVariant].reviews.length">Average score: {{ averageScore }}</b>
                 <ul>
-                    <li v-for="review in reviews">
+                    <li v-for="review in variants[selectedVariant].reviews">
                         <p>{{ review.name }}</p>
                         <p>Rating: {{ review.rating }}</p>
                         <p>{{ review.review }}</p>
@@ -276,13 +300,16 @@ Vue.component('product-tabs', {
     methods: {
         onSearchSubmit(){
             this.foundReview = []
+            this.searchStrings = []
+            
             console.log('Сработало событие поиска')
             console.log('Query:', this.query)
-            for(review in this.reviews){
-                this.searchStrings.push(`${this.reviews[review].name}${this.reviews[review].review}${this.reviews[review].rating}${this.reviews[review].recommended}`)
+            const reviews = this.variants[this.selectedVariant].reviews  
+            for(review in reviews){
+                this.searchStrings.push(`${reviews[review].name}${reviews[review].review}${reviews[review].rating}${reviews[review].recommended}`)
                 console.log('Строчка поиска:', this.searchStrings[review])
                 if(this.searchStrings[review].includes(this.query)){
-                    this.foundReview.push(this.reviews[review])
+                    this.foundReview.push(reviews[review])
                 }
             }
             console.log(this.searchStrings)
@@ -292,14 +319,7 @@ Vue.component('product-tabs', {
         }
     },
     computed: {
-        averageScore() {
-            let entireScore = 0
-            for (review in this.reviews) {
-                entireScore += this.reviews[review].rating
-            }
-            entireScore /= this.reviews.length
-            return entireScore.toFixed(1)
-        }
+        
     }
 })
 
