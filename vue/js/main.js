@@ -40,7 +40,13 @@ Vue.component('table-cards', {
             firstColumnLocked: false,
         }
     },
-    mounted() {
+    created(){
+        const savedData = localStorage.getItem('tableNotesState')
+        if(savedData){
+            const parsed = JSON.parse(savedData)
+            this.columnsNotes = parsed.columnsNotes || this.columnsNotes
+            this.firstColumnLocked = parsed.firstColumnLocked || false
+        }
         eventBus.$on('note-added', finalNote => {
             if(this.columnsNotes[0].notes.length < 3){
                 this.columnsNotes[0].notes.push(finalNote)
@@ -51,7 +57,36 @@ Vue.component('table-cards', {
             }
         })
     },
+    watch: {
+        columnsNotes: {
+            handler(){
+                this.saveState()
+            },
+            deep: true
+        },
+        firstColumnLocked(){
+            this.saveState()
+        }
+    },
+    // mounted() {
+    //     eventBus.$on('note-added', finalNote => {
+    //         if(this.columnsNotes[0].notes.length < 3){
+    //             this.columnsNotes[0].notes.push(finalNote)
+    //             console.log('Добавлена заметка в главную таблицу')
+    //             console.log(finalNote)
+    //         } else{
+    //             console.log('Нельзя добавить заметку - лимит первого столбца достигнут')
+    //         }
+    //     })
+    // },
     methods:{
+        saveState(){
+            const state = {
+                columnsNotes: this.columnsNotes,
+                firstColumnLocked: this.firstColumnLocked
+            }
+            localStorage.setItem('tableNotesState', JSON.stringify(state))
+        },
         handleMoveToColumn(note, nextColumnIndex){
             const maxNotes = [3, 5, Infinity]
             if(nextColumnIndex < maxNotes.length && this.columnsNotes[nextColumnIndex].notes.length >= maxNotes[nextColumnIndex]){
