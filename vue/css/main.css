@@ -33,6 +33,10 @@ body{
 .notes-table-container h2{
     text-align: center;
 }
+.notes-table-container.locked{
+    opacity: 0.6;
+    pointer-events: none;
+}
 
 .notes-adding{
     align-self: center;
