@@ -5,7 +5,7 @@ Vue.component('table-cards', {
     template: `
     <div class="notes-table">
         <div class="notes-table-container column1" :class="{locked: firstColumnLocked}">
-            <h2>{{columnsNotes[0].title}}</h2>
+            <h2>{{columnsNotes[0].title}} ({{columnsNotes[0].notes.length}}/3)</h2>
             <div>
                 <li v-for="(note, index) in columnsNotes[0].notes" :key="index">
                     <note-card :noteDetail="note" :columnIndex="0" :isLocked="firstColumnLocked" @move-to-column="handleMoveToColumn" @percentage-changed="checkFirstColumnLock"></note-card>
@@ -13,7 +13,7 @@ Vue.component('table-cards', {
             </div>
         </div>
         <div class="notes-table-container column2">
-            <h2>{{columnsNotes[1].title}}</h2>
+            <h2>{{columnsNotes[1].title}} ({{columnsNotes[1].notes.length}}/5)</h2>
             <div>
                 <li v-for="(note, index) in columnsNotes[1].notes" :key="index">
                     <note-card :noteDetail="note" :columnIndex="1" @move-to-column="handleMoveToColumn"></note-card>
@@ -21,7 +21,7 @@ Vue.component('table-cards', {
             </div>
         </div>
         <div class="notes-table-container column3">
-            <h2>{{columnsNotes[2].title}}</h2>
+            <h2>{{columnsNotes[2].title}} ({{columnsNotes[2].notes.length}})</h2>
             <div>
                 <li v-for="(note, index) in columnsNotes[2].notes" :key="index">
                     <note-card :noteDetail="note" :columnIndex="2"></note-card>
@@ -42,13 +42,22 @@ Vue.component('table-cards', {
     },
     mounted() {
         eventBus.$on('note-added', finalNote => {
-            this.columnsNotes[0].notes.push(finalNote)
-            console.log('Добавлена заметка в главную таблицу')
-            console.log(finalNote)
+            if(this.columnsNotes[0].notes.length < 3){
+                this.columnsNotes[0].notes.push(finalNote)
+                console.log('Добавлена заметка в главную таблицу')
+                console.log(finalNote)
+            } else{
+                console.log('Нельзя добавить заметку - лимит первого столбца достигнут')
+            }
         })
     },
     methods:{
         handleMoveToColumn(note, nextColumnIndex){
+            const maxNotes = [3, 5, Infinity]
+            if(nextColumnIndex < maxNotes.length && this.columnsNotes[nextColumnIndex].notes.length >= maxNotes[nextColumnIndex]){
+                console.log(`Нельяз переместить заметку в столбец ${nextColumnIndex +1} потому что лимит достигнут`)
+                return
+            }
             const currentColumnIndex = this.columnsNotes.findIndex(col => col.notes.includes(note))
             if(currentColumnIndex === -1 || currentColumnIndex === nextColumnIndex) return
             this.columnsNotes[currentColumnIndex].notes.splice(this.columnsNotes[currentColumnIndex].notes.indexOf(note), 1)
