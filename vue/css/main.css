@@ -48,7 +48,7 @@ body{
     background-color: aqua;
     width: 90%;
 }
-.note-list{
+.note-list, .notes-table{
     list-style: none;
 }
 .note-list li.completed label{

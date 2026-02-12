@@ -7,34 +7,35 @@ Vue.component('table-cards', {
         <div class="notes-table-container column1">
             <h2>{{columnsNotes[0].title}}</h2>
             <div>
-                <li v-for="note in columnsNotes[0].notes">
-                    <note-card :noteDetail="note"></note-card>
+                <li v-for="(note, index) in columnsNotes[0].notes" :key="index">
+                    <note-card :noteDetail="note" :columnIndex="0" @move-to-column="handleMoveToColumn"></note-card>
                 </li>
             </div>
         </div>
         <div class="notes-table-container column2">
             <h2>{{columnsNotes[1].title}}</h2>
+            <div>
+                <li v-for="(note, index) in columnsNotes[1].notes" :key="index">
+                    <note-card :noteDetail="note" :columnIndex="1" @move-to-column="handleMoveToColumn"></note-card>
+                </li>
+            </div>
         </div>
         <div class="notes-table-container column3">
             <h2>{{columnsNotes[2].title}}</h2>
+            <div>
+                <li v-for="(note, index) in columnsNotes[2].notes" :key="index">
+                    <note-card :noteDetail="note" :columnIndex="2"></note-card>
+                </li>
+            </div>
         </div>
     </div>
     `,
     data() {
         return {
             columnsNotes: [
-                {
-                    title: 'Column 1',
-                    notes: []
-                },
-                {
-                    title: 'Column 2',
-                    notes: []
-                },
-                {
-                    title: 'Column 3',
-                    notes: []
-                }
+                {title: 'Column 1', notes: []},
+                {title: 'Column 2', notes: []},
+                {title: 'Column 3', notes: []}
             ]
         }
     },
@@ -45,6 +46,14 @@ Vue.component('table-cards', {
             console.log(finalNote)
         })
     },
+    methods:{
+        handleMoveToColumn(note, nextColumnIndex){
+            const currentColumnIndex = this.columnsNotes.findIndex(col => col.notes.includes(note))
+            if(currentColumnIndex === -1 || currentColumnIndex === nextColumnIndex) return
+            this.columnsNotes[currentColumnIndex].notes.splice(this.columnsNotes[currentColumnIndex].notes.indexOf(note), 1)
+            this.columnsNotes[nextColumnIndex].notes.push(note)
+        }
+    }
 })
 
 Vue.component('note-card', {
@@ -52,7 +61,8 @@ Vue.component('note-card', {
         noteDetail:{
             type: Object,
             required: false,
-        }
+        },
+        columnIndex: Number,
     },
     template: `
     <div class="note">
@@ -79,15 +89,14 @@ Vue.component('note-card', {
                 <label :for="'note-item5-'+ _uid">{{noteDetail.item5}}</label>
             </li>
             <p class="progress-text">Completed: {{completionPercentage}}% </p>
+            <p v-if="noteDetail.completedAt" class="completed-at">Completed at: {{formatDate(noteDetail.completedAt)}} </p>
         </ul>
     </div>
     `,
     data() {
         return {
             title: null,
-            notes: [
-
-            ]
+            notes: []
         }
     },
     computed: {
@@ -106,6 +115,25 @@ Vue.component('note-card', {
             })
             if(total === 0) return 0
             return Math.round((completed / total) * 100)
+        }
+    },
+    watch: {
+        completionPercentage(newVal){
+            if(this.columnIndex === 0){
+                if(newVal > 50){
+                    this.$emit('move-to-column', this.noteDetail, 1)
+                }
+            } else if(this.columnIndex === 1){
+                if(newVal >= 100){
+                    this.noteDetail.completedAt = new Date()
+                    this.$emit('move-to-column', this.noteDetail, 2)
+                }
+            }
+        }
+    },
+    methods:{
+        formatDate(date){
+            return date.toLocaleString()
         }
     }
 
