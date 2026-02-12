@@ -37,3 +37,22 @@ body{
 .notes-adding{
     align-self: center;
 }
+.notes-adding-list{
+    list-style: none;
+}
+
+
+
+.note{
+    align-self: center;
+    background-color: aqua;
+    width: 90%;
+}
+.note-list{
+    list-style: none;
+}
+.check-label-text{
+    
+}
+
+

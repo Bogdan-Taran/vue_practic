@@ -6,6 +6,11 @@ Vue.component('table-cards', {
     <div class="notes-table">
                 <div class="notes-table-container column1">
                 <h2>{{columnsNotes[0].title}}</h2>
+                    <div>
+                        <li v-for="note in columnsNotes[0].notes">
+                            <note-card :noteDetail="note"></note-card>
+                        </li>
+                    </div>
                 </div>
                 <div class="notes-table-container column2">
                 <h2>{{columnsNotes[1].title}}</h2>
@@ -37,30 +42,45 @@ Vue.component('table-cards', {
         eventBus.$on('note-added', finalNote => {
             this.columnsNotes[0].notes.push(finalNote)
             console.log('Добавлена заметка в главную таблицу')
-            console.log()
-            
-
+            console.log(finalNote)
         })
     },
 })
 
 Vue.component('note-card', {
+    props: {
+        noteDetail:{
+            type: Object,
+            required: false,
+        }
+    },
     template: `
     <div class="note">
-                <ul class="add-notes-list">
-                    <li class="add-notes-list-item">
-                        <input type="checkbox" class="hidden-box" id="first-item">
-                        <label for="first-item" class="check-label">
-                            <span class="check-label-text">Text 1</span>
-                            <span class="check-label-box"></span>
-                        </label>
-                    </li>
-                </ul>
-            </div>
+        <ul class="note-list">
+            <h3>{{noteDetail.title}}</h3>
+            <li :class="{completed: noteDetail.item1Checked}">
+                <input type="checkbox" :id="note-item1" v-model="noteDetail.item1Checked">
+                <label for="note-item1">{{noteDetail.item1}}</label>
+            </li>
+            <li :class="{completed: noteDetail.item2Checked}">
+                <input type="checkbox" :id="note-item2" v-model="noteDetail.item2Checked">
+                <label for="note-item2">{{noteDetail.item2}}</label>
+            </li>
+            <li :class="{completed: noteDetail.item3Checked}">
+                <input type="checkbox" :id="note-item3" v-model="noteDetail.item3Checked">
+                <label for="note-item3">{{noteDetail.item3}}</label>
+            </li>
+            <li v-if="noteDetail.item4" :class="{completed: noteDetail.item4Checked}">
+                <input type="checkbox" :id="note-item4">
+                <label for="note-item4">{{noteDetail.item4}}</label>
+            </li>
+            <li v-if="noteDetail.item5">
+                <input type="checkbox" id="note-item5">
+                <label for="note-item5">{{noteDetail.item5}}</label>
+            </li>
+        </ul>
+    </div>
     `,
-    props: {
-
-    },
     data() {
         return {
             title: null,
@@ -80,7 +100,7 @@ Vue.component('add-note', {
                 <h2>Add note</h2>
                 <label for="title">Title</label>
                 <input type="text" id="title" placeholder="title" v-model="title">
-                <ul>
+                <ul class="notes-adding-list">
                     <li>
                         <label for="item1">1</label>
                         <input type="text" id="item1" v-model="item1">
