@@ -4,6 +4,7 @@ let eventBus = new Vue()
 Vue.component('table-cards', {
     template: `
     <div class="notes-table">
+        <notification-popka :show="showNotification" :message="notificationMessage" :imageUrl="notificationImage" @close="hideNotification"></notification-popka>
         <div class="notes-table-container column1" :class="{locked: firstColumnLocked}">
             <h2>{{columnsNotes[0].title}} ({{columnsNotes[0].notes.length}}/3)</h2>
             <div>
@@ -38,6 +39,9 @@ Vue.component('table-cards', {
                 {title: 'Column 3', notes: []}
             ],
             firstColumnLocked: false,
+            showNotification: false,
+            notificationMessage: '',
+            notificationImage: 'src/imgs/warn1_image.png'
         }
     },
     created(){
@@ -54,6 +58,7 @@ Vue.component('table-cards', {
                 console.log(finalNote)
             } else{
                 console.log('Нельзя добавить заметку - лимит первого столбца достигнут')
+                this.showNotificationMessage('Нельзя добавить заметку - лимит достигнут')
             }
         })
     },
@@ -87,9 +92,18 @@ Vue.component('table-cards', {
             }
             localStorage.setItem('tableNotesState', JSON.stringify(state))
         },
+        showNotificationMessage(message, url){
+            if(url) this.notificationImage = url
+            this.notificationMessage = message
+            this.showNotification = true
+        },
+        hideNotification(){
+            this.showNotification = false
+        },
         handleMoveToColumn(note, nextColumnIndex){
             const maxNotes = [3, 5, Infinity]
             if(nextColumnIndex < maxNotes.length && this.columnsNotes[nextColumnIndex].notes.length >= maxNotes[nextColumnIndex]){
+                this.showNotificationMessage(`Нельяз переместить заметку в столбец ${nextColumnIndex +1} потому что лимит достигнут`, 'src/imgs/warn2_image.png')
                 console.log(`Нельяз переместить заметку в столбец ${nextColumnIndex +1} потому что лимит достигнут`)
                 return
             }
@@ -297,7 +311,31 @@ Vue.component('add-note', {
             }
         }
     },
+})
 
+Vue.component('notification-popka', {
+    props: {
+        show: Boolean,
+        message: String,
+        imageUrl: String
+    },
+    template: `
+    <div class="notification-container" v-show="show">
+        <div class="notification-content">
+            <img :src="imageUrl" alt="Notification Image" class="notification-image">
+            <p class="notification-message">{{ message }}</p>
+        </div>
+    </div>
+    `,
+    watch: {
+        show(newVal){
+            if(newVal){
+                setTimeout(() => {
+                    this.$emit('close')
+                }, 3000)
+            }
+        }
+    }
 })
 
 

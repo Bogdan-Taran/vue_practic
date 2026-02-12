@@ -23,7 +23,7 @@ body{
     background-color: blue;
 }
 .column3 {
-    background-color: yellow;
+    background-color: rgb(60, 255, 0);
 }
 
 .notes-table-container {
@@ -62,6 +62,45 @@ body{
 .progress-text{
     font-size: 0.9em;
     color: #242424;
+}
+
+
+.notification-container {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+.notification-content {
+    background: rgb(248, 16, 16);
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    width: 600px;
+    animation: slideDown 0.5s forwards, slideUp 0.5s 2.5s forwards;
+}
+
+.notification-image {
+    width: 300px;
+    height: 300px;
+    margin-right: 10px;
+}
+
+.notification-message {
+    margin: 0;
+    font-size: 24px;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(0); }
+    to { transform: translateY(-100%); }
 }
 
 
