@@ -51,8 +51,13 @@ body{
 .note-list{
     list-style: none;
 }
-.check-label-text{
-    
+.note-list li.completed label{
+    text-decoration: line-through;
+    color: gray;
+}
+.progress-text{
+    font-size: 0.9em;
+    color: #242424;
 }
 
 

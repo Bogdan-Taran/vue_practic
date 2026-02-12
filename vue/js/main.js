@@ -4,21 +4,21 @@ let eventBus = new Vue()
 Vue.component('table-cards', {
     template: `
     <div class="notes-table">
-                <div class="notes-table-container column1">
-                <h2>{{columnsNotes[0].title}}</h2>
-                    <div>
-                        <li v-for="note in columnsNotes[0].notes">
-                            <note-card :noteDetail="note"></note-card>
-                        </li>
-                    </div>
-                </div>
-                <div class="notes-table-container column2">
-                <h2>{{columnsNotes[1].title}}</h2>
-                </div>
-                <div class="notes-table-container column3">
-                <h2>{{columnsNotes[2].title}}</h2>
-                </div>
+        <div class="notes-table-container column1">
+            <h2>{{columnsNotes[0].title}}</h2>
+            <div>
+                <li v-for="note in columnsNotes[0].notes">
+                    <note-card :noteDetail="note"></note-card>
+                </li>
             </div>
+        </div>
+        <div class="notes-table-container column2">
+            <h2>{{columnsNotes[1].title}}</h2>
+        </div>
+        <div class="notes-table-container column3">
+            <h2>{{columnsNotes[2].title}}</h2>
+        </div>
+    </div>
     `,
     data() {
         return {
@@ -59,25 +59,26 @@ Vue.component('note-card', {
         <ul class="note-list">
             <h3>{{noteDetail.title}}</h3>
             <li :class="{completed: noteDetail.item1Checked}">
-                <input type="checkbox" :id="note-item1" v-model="noteDetail.item1Checked">
-                <label for="note-item1">{{noteDetail.item1}}</label>
+                <input type="checkbox" :id="'note-item1-'+ _uid" v-model="noteDetail.item1Checked">
+                <label :for="'note-item1-'+ _uid">{{noteDetail.item1}}</label>
             </li>
             <li :class="{completed: noteDetail.item2Checked}">
-                <input type="checkbox" :id="note-item2" v-model="noteDetail.item2Checked">
-                <label for="note-item2">{{noteDetail.item2}}</label>
+                <input type="checkbox" :id="'note-item2-'+ _uid" v-model="noteDetail.item2Checked">
+                <label :for="'note-item2-'+ _uid">{{noteDetail.item2}}</label>
             </li>
             <li :class="{completed: noteDetail.item3Checked}">
-                <input type="checkbox" :id="note-item3" v-model="noteDetail.item3Checked">
-                <label for="note-item3">{{noteDetail.item3}}</label>
+                <input type="checkbox" :id="'note-item3-'+ _uid" v-model="noteDetail.item3Checked">
+                <label :for="'note-item3-'+ _uid">{{noteDetail.item3}}</label>
             </li>
             <li v-if="noteDetail.item4" :class="{completed: noteDetail.item4Checked}">
-                <input type="checkbox" :id="note-item4">
-                <label for="note-item4">{{noteDetail.item4}}</label>
+                <input type="checkbox" :id="'note-item4-'+ _uid" v-model="noteDetail.item4Checked">
+                <label :for="'note-item4-'+ _uid">{{noteDetail.item4}}</label>
             </li>
-            <li v-if="noteDetail.item5">
-                <input type="checkbox" id="note-item5">
-                <label for="note-item5">{{noteDetail.item5}}</label>
+            <li v-if="noteDetail.item5" :class="{completed: noteDetail.item5Checked}">
+                <input type="checkbox" :id="'note-item5-'+ _uid" v-model="noteDetail.item5Checked">
+                <label :for="'note-item5-'+ _uid">{{noteDetail.item5}}</label>
             </li>
+            <p class="progress-text">Completed: {{completionPercentage}}% </p>
         </ul>
     </div>
     `,
@@ -87,6 +88,24 @@ Vue.component('note-card', {
             notes: [
 
             ]
+        }
+    },
+    computed: {
+        completionPercentage(){
+            const items = ['item1', 'item2', 'item3', 'item4', 'item5',]
+            let total = 0
+            let completed = 0
+            items.forEach(itemKey => {
+                if(this.noteDetail[itemKey] !== undefined && this.noteDetail !== null && this.noteDetail[itemKey] !== null){
+                    total++
+                    const checkedKey = `${itemKey}Checked`
+                    if(this.noteDetail[checkedKey]){
+                        completed++
+                    }
+                }
+            })
+            if(total === 0) return 0
+            return Math.round((completed / total) * 100)
         }
     }
 
