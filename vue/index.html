@@ -12,61 +12,7 @@
 
 <body>
     <div id="app">
-        <div class="note-form">
-            <h3>Create new note</h3>
-            <input v-model="newNoteTitle" placeholder="Note title">
-            <button @click="addNote">Add note</button>
-        </div>
-
-        <div class="notes-table">
-            <div class="notes-table-container">
-                <h3>Column 1</h3>
-                <div v-for="(note, index) in columns.col1" :key="note.id" class="note-card">
-                    <h4>{{note.title}}</h4>
-                    <ul>
-                        <li v-for="(item, itemIndex) in note.items" :key="itemIndex">
-                            <label >
-                                <input type="checkbox" v-model="item.completed" @change="onItemChange(note)">
-                                {{item.text}}
-                            </label>
-                        </li>
-                    </ul>
-                    <p v-if="note.completionTime">Completed at: {{note.completionTime}}</p>
-                </div>
-            </div>
-
-            <div class="notes-table-container">
-                <h3>Column 2</h3>
-                <div v-for="(note, index) in columns.col2" :key="note.id" class="note-card">
-                    <h4>{{note.title}}</h4>
-                    <ul>
-                        <li v-for="(item, itemIndex) in note.items" :key="itemIndex">
-                            <label >
-                                <input type="checkbox" v-model="item.completed" @change="onItemChange(note)">
-                                {{item.text}}
-                            </label>
-                        </li>
-                    </ul>
-                    <p v-if="note.completionTime">Completed at: {{note.completionTime}}</p>
-                </div>
-            </div>
-
-            <div class="notes-table-container">
-                <h3>Column 3</h3>
-                <div v-for="(note, index) in columns.col3" :key="note.id" class="note-card">
-                    <h4>{{note.title}}</h4>
-                    <ul>
-                        <li v-for="(item, itemIndex) in note.items" :key="itemIndex">
-                            <label >
-                                <input type="checkbox" v-model="item.completed" @change="onItemChange(note)">
-                                {{item.text}}
-                            </label>
-                        </li>
-                    </ul>
-                    <p v-if="note.completionTime">Cpmpleted at: {{note.completionTime}}</p>
-                </div>
-            </div>
-        </div>
+        
     </div>
 </body>
 
