@@ -2,27 +2,38 @@
     font-family: Roboto-Condensed;
     src: url('/vue/src/fonts/RobotoCondensed-Regular.ttf');
 }
-
-
-
 body{
     font-family: Roboto-Condensed;
 }
-
-
-
-
-.notes-table>div:first-child {
-    /* background-color: red; */
+.app-conteainer{
+    display: flex;
+    flex-direction: column;
 }
-.notes-table>div:nth-child(2) {
-    /* background-color: blue; */
+
+.notes-table {
+    display: flex;
+    width: 100%;
+    height: 80vh;
+    flex: 1 1 calc(33.333% - 10px);
 }
-.notes-table>div:last-child {
-    /* background-color: yellow; */
+.column1 {
+    background-color: red;
+}
+.column2 {
+    background-color: blue;
+}
+.column3 {
+    background-color: yellow;
 }
 
 .notes-table-container {
  width: 100%;   
  border: 1px solid black;
+}
+.notes-table-container h2{
+    text-align: center;
+}
+
+.notes-adding{
+    align-self: center;
 }
