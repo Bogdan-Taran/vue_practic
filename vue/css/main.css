@@ -16,9 +16,19 @@ body {
     min-height: 600px;
 }
 .kanban-column{
-    
+    background: #f7ffdf;
+    display: flex;
+    flex-direction: column;
 }
-
+.tasks-container{
+    flex: 1;
+}
+.task-card{
+    background: #ffc3c3;
+}
+.task-card{
+    background: #ffc3c3;
+}
 .task-description{
     font-size: 1rem;
 }
