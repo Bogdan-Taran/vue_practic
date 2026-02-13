@@ -25,7 +25,7 @@ Vue.component('table-cards', {
             <h2>{{columnsNotes[2].title}} ({{columnsNotes[2].notes.length}})</h2>
             <div>
                 <li v-for="(note, index) in columnsNotes[2].notes" :key="index">
-                    <note-card :noteDetail="note" :columnIndex="2"></note-card>
+                    <note-card :noteDetail="note" :columnIndex="2" :isDisabled="true" ></note-card>
                 </li>
             </div>
         </div>
@@ -154,29 +154,31 @@ Vue.component('note-card', {
         },
         columnIndex: Number,
         isLocked: Boolean,
+        isDisabled: Boolean,
+
     },
     template: `
     <div class="note">
         <ul class="note-list">
             <h3>{{noteDetail.title}}</h3>
             <li :class="{completed: noteDetail.item1Checked}">
-                <input type="checkbox" :id="'note-item1-'+ _uid" v-model="noteDetail.item1Checked" :disabled="isLocked">
+                <input type="checkbox" :id="'note-item1-'+ _uid" v-model="noteDetail.item1Checked" :disabled="isLocked" :disabled="isDisabled">
                 <label :for="'note-item1-'+ _uid">{{noteDetail.item1}}</label>
             </li>
             <li :class="{completed: noteDetail.item2Checked}">
-                <input type="checkbox" :id="'note-item2-'+ _uid" v-model="noteDetail.item2Checked" :disabled="isLocked">
+                <input type="checkbox" :id="'note-item2-'+ _uid" v-model="noteDetail.item2Checked" :disabled="isLocked" :disabled="isDisabled">
                 <label :for="'note-item2-'+ _uid">{{noteDetail.item2}}</label>
             </li>
             <li :class="{completed: noteDetail.item3Checked}">
-                <input type="checkbox" :id="'note-item3-'+ _uid" v-model="noteDetail.item3Checked" :disabled="isLocked">
+                <input type="checkbox" :id="'note-item3-'+ _uid" v-model="noteDetail.item3Checked" :disabled="isLocked" :disabled="isDisabled">
                 <label :for="'note-item3-'+ _uid">{{noteDetail.item3}}</label>
             </li>
             <li v-if="noteDetail.item4" :class="{completed: noteDetail.item4Checked}">
-                <input type="checkbox" :id="'note-item4-'+ _uid" v-model="noteDetail.item4Checked" :disabled="isLocked">
+                <input type="checkbox" :id="'note-item4-'+ _uid" v-model="noteDetail.item4Checked" :disabled="isLocked" :disabled="isDisabled">
                 <label :for="'note-item4-'+ _uid">{{noteDetail.item4}}</label>
             </li>
             <li v-if="noteDetail.item5" :class="{completed: noteDetail.item5Checked}">
-                <input type="checkbox" :id="'note-item5-'+ _uid" v-model="noteDetail.item5Checked" :disabled="isLocked">
+                <input type="checkbox" :id="'note-item5-'+ _uid" v-model="noteDetail.item5Checked" :disabled="isLocked" :disabled="isDisabled">
                 <label :for="'note-item5-'+ _uid">{{noteDetail.item5}}</label>
             </li>
             <p class="progress-text">Completed: {{completionPercentage}}% </p>
