@@ -106,6 +106,132 @@ Vue.component('kanban-column', {
     `
 })
 
+Vue.component('kanban-board', {
+    template: `
+    <div class="kanban-board">
+        <notification-popka :show="showNotification" :message="notificationMessage" :imageUrl="notificationImage" @close="hideNotification"></notification-popka>
+        <div class="board-columns">
+            <kanban-column
+                v-for="(column, index) in columns"
+                :key="index"
+                :title="column.title"
+                :tasks="column.tasks"
+                :column-index="index"
+                :editing-task-id="editingTaskId"
+                @start-edit="startEditing"
+                @delete-task="deleteTask"
+                @move-task="moveTask"
+                @update-task="updateTask"
+                @cancel-edit="editingTaskId = null"
+            />
+        </div>
+        <add-task-form v-if="showAddForm" @add-task="add-task" @close="showAddForm = false" />
+        <button v-if="!showAddForm" @click="showAddForm = true" class="add-task-btn">Add task</button>
+    </div>
+    `,
+    data(){
+        return {
+            columns: [
+                { title: 'Запланированные задачи', tasks: [] },
+                { title: 'Задачи в работе', tasks: [] },
+                { title: 'Тестирование', tasks: [] },
+                { title: 'Выполненные задачи', tasks: [] }
+            ],
+            editingTaskId: null,
+            showAddForm: false,
+            showNotification: false,
+            notificationMessage: '',
+            notificationImage: 'src/imgs/warn1_image.png'
+        }
+    },
+    created(){
+        const savedData = localStorage.getItem('kanbanBoardState')
+        if (savedData) {
+            try {
+                const parsed = JSON.parse(savedData)
+                this.columns = parsed.columns || this.columns
+            } catch (e) {
+                console.log(e)
+            }
+        }
+    },
+    watch: {
+        columns: {
+            handler() {
+                this.saveState()
+            },
+            deep: true
+        }
+    },
+    methods:{
+        saveState() {
+            const state = { columns: this.columns }
+            localStorage.setItem('kanbanBoardState', JSON.stringify(state))
+        },
+        addTask(task) {
+            const newTask = {
+                id: Date.now().toString(),
+                createdAt: new Date().toISOString(),
+                ...task
+            }
+            this.columns[0].tasks.push(newTask)
+            this.showAddForm = false
+        },
+        deleteTask(taskId) {
+            const firstColumnTasks = this.columns[0].tasks
+            const taskIndex = firstColumnTasks.findIndex(task => task.id === taskId)
+            if (taskIndex !== -1) {
+                firstColumnTasks.splice(taskIndex, 1)
+            }
+        },
+        moveTask(taskId, targetColumnIndex, updatedTask = null){
+            let sourceColumnIndex = -1
+            let task = null
+
+            for(let i =0; i< this.columns.length; i++){
+                const taskIndex = this.columns[i].tasks.findIndex(t => t.id === taskId)
+                if(taskIndex !== -1){
+                    sourceColumnIndex = i
+                    task = this.columns[i].tasks[taskIndex]
+                    break
+                }
+            }
+
+            if(sourceColumnIndex === -1 || task === null) return
+
+            this.columns[sourceColumnIndex].tasks.splice(this.columns[sourceColumnIndex].tasks.findIndex(t => t.id === taskId), 1)
+            if(updatedTask){
+                task = updatedTask
+            }
+            this.columns[targetColumnIndex].tasks.push(task)
+            this.editingTaskId = null
+        },
+        updatedTask(updatedTask){
+            for(let i =0; i< this.columns.length; i++){
+                const taskIndex = this.columns[i].tasks.findIndex(t => t.id === updatedTask.id)
+                if(taskIndex !== -1){
+                    this.columns[i].tasks[taskIndex] = updatedTask
+                    break
+                }
+            }
+            this.editingTaskId = null
+        },
+        startEditing(taskId) {
+            this.editingTaskId = taskId
+        },
+        showNotificationMessage(message, url) {
+            if (url) this.notificationImage = url
+            this.notificationMessage = message
+            this.showNotification = true
+        },
+        hideNotification() {
+            this.showNotification = false
+        }
+    }
+})
+
+
+
 
 
 
