@@ -30,6 +30,13 @@ body{
  width: 100%;   
  border: 1px solid black;
 }
+.notes-table-container ul {
+    list-style: none;
+    padding: 0;
+}
+.notes-table-container li {
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
 .notes-table-container h2{
     text-align: center;
 }
@@ -44,6 +51,10 @@ body{
 .notes-adding-list{
     list-style: none;
 }
+input[type="text"].inputNotFilled{
+    border: 2px solid red;
+}
+
 
 
 
@@ -54,6 +65,8 @@ body{
 }
 .note-list, .notes-table{
     list-style: none;
+}.note-list li {
+    transition: transform 0.3s ease, opacity 0.3s ease;
 }
 .note-list li.completed label{
     text-decoration: line-through;

@@ -61,6 +61,9 @@ Vue.component('table-cards', {
                 this.showNotificationMessage('Нельзя добавить заметку - лимит достигнут')
             }
         })
+        eventBus.$on('show-notification', (message) =>{
+            this.showNotificationMessage(message, 'src/imgs/warn3_image.png')
+        })
     },
     watch: {
         columnsNotes: {
@@ -240,25 +243,25 @@ Vue.component('add-note', {
             <form @submit.prevent="onSubmit">
                 <h2>Add note</h2>
                 <label for="title">Title</label>
-                <input type="text" id="title" placeholder="title" v-model="title">
+                <input type="text" id="title" placeholder="title" v-model="title" :class="{inputNotFilled: isTitleNotFilled}">
                 <ul class="notes-adding-list">
                     <li>
                         <label for="item1">1</label>
-                        <input type="text" id="item1" v-model="item1">
+                        <input type="text" id="item1" v-model="item1" :class="{inputNotFilled: isItem1NotFilled}">
                     </li>
                     <li>
                         <label for="item2">2</label>
-                        <input type="text" id="item2" v-model="item2">
+                        <input type="text" id="item2" v-model="item2" :class="{inputNotFilled: isItem2NotFilled}">
                     </li>
                     <li>
                         <label for="item3">3</label>
-                        <input type="text" id="item3" v-model="item3">
+                        <input type="text" id="item3" v-model="item3" :class="{inputNotFilled: isItem3NotFilled}">
                     </li>
-                    <li>
+                    <li v-if="item1 && item2 && item3">
                         <label for="item4">4</label>
                         <input type="text" id="item4" v-model="item4">
                     </li>
-                    <li>
+                    <li v-if="item1 && item2 && item3 && item4">
                         <label for="item5">5</label>
                         <input type="text" id="item5" v-model="item5">
                     </li>
@@ -282,10 +285,36 @@ Vue.component('add-note', {
             item3Checked: false,
             item4Checked: false,
             item5Checked: false,
+
+            isTitleNotFilled: false,
+            isItem1NotFilled: false,
+            isItem2NotFilled: false,
+            isItem3NotFilled: false,
         }
     },
     methods: {
         onSubmit() {
+            this.isTitleNotFilled = false;
+            this.isItem1NotFilled = false;
+            this.isItem2NotFilled = false;
+            this.isItem3NotFilled = false;
+
+            if(!this.title || !this.item1 || !this.item2 || !this.item3){
+                if(!this.title){
+                    this.isTitleNotFilled = true
+                }
+                if(!this.item1){
+                    this.isItem1NotFilled = true
+                }
+                if(!this.item2){
+                    this.isItem2NotFilled = true
+                }
+                if(!this.item3){
+                    this.isItem3NotFilled = true
+                }
+                eventBus.$emit('show-notification', 'Не все обязательные поля заполнены')
+                return
+            }
             if (this.title && this.item1 && this.item2 && this.item3) {
                 let finalNote = {
                     title: this.title,
