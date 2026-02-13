@@ -7,6 +7,32 @@ body {
     font-family: 'Roboto-Condensed';
 }
 
+
+.task-card{
+    background: #c2d650;
+}
+
+.task-description{
+    font-size: 1rem;
+}
+.task-info{
+
+}
+.overdue-badge{
+    color: red;
+    font-weight: bold;
+}
+
+
+
+
+
+
+
+
+
+
+
 .app-conteainer {
     display: flex;
     flex-direction: column;

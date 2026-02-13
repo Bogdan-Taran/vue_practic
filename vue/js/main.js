@@ -1,5 +1,98 @@
 let eventBus = new Vue()
 
+Vue.component('task-card', {
+    props: {
+        task: {
+            type: Object,
+            required: true
+        },
+        columnIndex: Number,
+        isEditing: Boolean
+    },
+    template: `
+        <div class="task-card" :class="{overdue: isOverdue}">
+            <div v-if="!isEditing">
+                <h4>{{task.title}}</h4>
+                <p class="task-description">{{task.description}}</p>
+                <div class="task-info">
+                    <p><strong>Created:</strong> {{formatDate(task.createdAt)}}</p>
+                    <p><strong>Deadline:</strong> {{formatDate(task.deadline)}}</p>
+                    <p v-if="editedAt"><strong>Last edit:</strong> {{formatDate(task.editedAt)}}</p>
+                    <p v-if="complitedAt"><strong>Complited:</strong> {{formatDate(task.complitedAt)}}</p>
+                    <p v-if="returnReason"><strong>Return reason:</strong> {{task.returnReason}}</p>
+                    <p v-if="isOverdue" class="overdue-badge">OVERDUE</p>
+                    <p v-else-if="columnIndex === 3 && !isOverdue" class="ontime-badge">COMPLITED ON TIME</p>
+                </div>
+
+                <div class="card-actions">
+                    <button v-if="columnIndex === 0" @click="$emit('edit')">Edit</button>
+                    <button v-if="columnIndex === 1" @click="$emit('edit')">Edit</button>
+                    <button v-if="columnIndex === 2" @click="$emit('edit')">Edit</button>
+                    
+                    <button v-if="columnIndex === 0" @click="$emit('delete')" class="btn-delete">Delete</button>
+                    
+                    <button v-if="columnIndex === 0" @click="$emit('move', 1)" class="btn-move">Work</button>
+                    <button v-if="columnIndex === 1" @click="$emit('move', 2)" class="btn-move">Testing</button>
+                    
+                    <button v-if="columnIndex === 2" @click="moveToDone" class="btn-move">Done</button>
+                    
+                    <button v-if="columnIndex === 2" @click="returnToWork" class="btn-return">Return to work</button>
+                </div>
+            </div>
+
+            <div v-else class="edit-form">
+                <h4>Edit Task</h4>
+                <input v-model="editedTask.title" placeholder="Title" class="edit-input">
+                <textarea v-model="editedTask.description" placeholder="Description" class="edit-textarea"></textarea>
+                <input type="datetime-local" v-model="editedTask.deadline" class="edit-input">
+                <div class="edit-actions">
+                    <button @click="saveEdit" class="btn-save">Save</button>
+                    <button @click="$emit('cancel-edit')" class="btn-cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+    `,
+    data(){
+        return{
+            editedTask:{
+                ...this.task
+            }
+        }
+    },
+    computed: {
+        isOverdue(){
+            if(!this.task.deadline || this.columnIndex !== 3) return false
+            return new Date(this.task.dedline) < new Date()
+        }
+    },
+    methods: {
+        formatDate(date){
+            if(!date) return ''
+            return new Date(date).toLocaleString()
+        },
+        saveEdit(){
+            this.editedTask.editedAt = new Date().toISOString()
+            this.$emit('update-task', this.editedTask)
+        },
+        moveToDone(){
+            const updatedTask = { ...this.task, completedAt: new Date().toISOString()}
+            this.$emit('move', 3, updatedTask)
+        },
+        returnToWork(){
+            const reason = prompt('Enter reason for returning to work')
+            if(reason !== null){
+                const updatedTask = {...this.task, returnReason: reason}
+                this.$emit('move', 1, updatedTask)
+            }
+        }
+    }
+})
+
+
+
+
+
+
 
 Vue.component('table-cards', {
     template: `
