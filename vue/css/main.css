@@ -1,11 +1,13 @@
 @font-face {
     font-family: 'Roboto-Condensed';
-    src: url('/vue/src/fonts/RobotoCondensed-Regular.ttf');
+    src: url("../src/fonts/RobotoCondensed-Regular.ttf");
 }
-body{
+
+body {
     font-family: 'Roboto-Condensed';
 }
-.app-conteainer{
+
+.app-conteainer {
     display: flex;
     flex-direction: column;
 }
@@ -16,63 +18,78 @@ body{
     height: 80vh;
     flex: 1 1 calc(33.333% - 10px);
 }
+
 .column1 {
     background-color: red;
 }
+
 .column2 {
     background-color: blue;
 }
+
 .column3 {
     background-color: rgb(60, 255, 0);
 }
 
 .notes-table-container {
- width: 100%;   
- border: 1px solid black;
+    width: 100%;
+    border: 1px solid black;
 }
+
 .notes-table-container ul {
     list-style: none;
     padding: 0;
 }
+
 .notes-table-container li {
     transition: transform 0.2s ease, opacity 0.2s ease;
 }
-.notes-table-container h2{
+
+.notes-table-container h2 {
     text-align: center;
 }
-.notes-table-container.locked{
+
+.notes-table-container.locked {
     opacity: 0.6;
     pointer-events: none;
 }
 
-.notes-adding{
+.notes-adding {
     align-self: center;
 }
-.notes-adding-list{
+
+.notes-adding-list {
     list-style: none;
 }
-input[type="text"].inputNotFilled{
+
+input[type="text"].inputNotFilled {
     border: 2px solid red;
 }
 
 
 
 
-.note{
+.note {
     align-self: center;
     background-color: aqua;
     width: 90%;
 }
-.note-list, .notes-table{
+
+.note-list,
+.notes-table {
     list-style: none;
-}.note-list li {
+}
+
+.note-list li {
     transition: transform 0.3s ease, opacity 0.3s ease;
 }
-.note-list li.completed label{
+
+.note-list li.completed label {
     text-decoration: line-through;
     color: gray;
 }
-.progress-text{
+
+.progress-text {
     font-size: 0.9em;
     color: #242424;
 }
@@ -107,13 +124,21 @@ input[type="text"].inputNotFilled{
 }
 
 @keyframes slideDown {
-    from { transform: translateY(-100%); }
-    to { transform: translateY(0); }
+    from {
+        transform: translateY(-100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
 }
 
 @keyframes slideUp {
-    from { transform: translateY(0); }
-    to { transform: translateY(-100%); }
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-100%);
+    }
 }
-
-
