@@ -206,7 +206,7 @@ Vue.component('kanban-board', {
             this.columns[targetColumnIndex].tasks.push(task)
             this.editingTaskId = null
         },
-        updatedTask(updatedTask){
+        updateTask(updatedTask){
             for(let i =0; i< this.columns.length; i++){
                 const taskIndex = this.columns[i].tasks.findIndex(t => t.id === updatedTask.id)
                 if(taskIndex !== -1){
@@ -231,7 +231,59 @@ Vue.component('kanban-board', {
 })
 
 
-
+Vue.component('add-task-form', {
+    template: `
+    <div class="add-task-form-overlay">
+        <div class="add-task-form">
+            <h3>Add new task</h3>
+            <form @submit.prevent="submitTask">
+                <div class="form-group">
+                    <label for="task-title">Title</label>
+                    <input type="text" id="task-title" v-model="title" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="task-desc">Description</label>
+                    <textarea id="task-desc" v-model="description" class="form-control"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="task-deadline">Deadline</label>
+                    <input type="datetime-local" id="task-deadline" v-model="deadline" required class="form-control">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">Add Task</button>
+                    <button type="button" @click="$emit('close')" class="btn-cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    `,
+    data() {
+        return {
+            title: '',
+            description: '',
+            deadline: ''
+        }
+    },
+    methods: {
+        submitTask() {
+            if (!this.title || !this.deadline) {
+                eventBus.$emit('show-notification', 'Title and deadline are required, bitch')
+                return
+            }
+            const task = {
+                title: this.title,
+                description: this.description,
+                deadline: this.deadline
+            }
+            this.$emit('add-task', task)
+            this.title = ''
+            this.description = ''
+            this.deadline = ''
+        }
+    }
+})
 
 
 

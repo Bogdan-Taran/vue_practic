@@ -11,6 +11,13 @@ body {
 .task-card{
     background: #c2d650;
 }
+.board-columns{
+    display: flex;
+    min-height: 600px;
+}
+.kanban-column{
+    
+}
 
 .task-description{
     font-size: 1rem;
