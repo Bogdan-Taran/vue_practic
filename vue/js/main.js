@@ -89,6 +89,27 @@ Vue.component('task-card', {
 })
 
 
+Vue.component('kanban-column', {
+    props: {
+        title: String,
+        tasks: Array,
+        columnIndex: Number,
+        editingTaskId: String,
+    },
+    template: `
+    <div class="kanban-column">
+        <h3>{{title}} ({{tasks.length}})</h3>
+        <div class="tasks-container">
+            <task-card v-for="task in tasks" :key="task.id" :task="task" :column-index="columnIndex" :idEditing="editingTaskId === task.id" @edit="$emit('start-edit', task.id)" @delete="$emit('delete-task', task.id)" @move="$emit('move-task', task.id, $event)" @update-task="$emit('update-task', $event)" @cancel-edit="$emit('cancel-edit')"/>
+        </div>
+    </div>
+    `
+})
+
+
+
+
+
 
 
 
