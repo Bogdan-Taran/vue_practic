@@ -2,9 +2,18 @@
     font-family: 'Roboto-Condensed';
     src: url("../src/fonts/RobotoCondensed-Regular.ttf");
 }
+@font-face {
+    font-family: 'PlayfairDisplay';
+    src: url("../src/fonts/PlayfairDisplay.ttf");
+}
+@font-face {
+    font-family: 'PlayfairDisplay-Italic';
+    src: url("../src/fonts/PlayfairDisplay-Italic.ttf");
+    font-style: italic;
+}
 
 body {
-    font-family: 'Roboto-Condensed';
+    font-family: 'PlayfairDisplay-Italic';
 }
 
 .app-conteainer {
@@ -47,7 +56,7 @@ body {
 }
 
 .notes-table-container li {
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    transition: transform 1s ease, opacity 0.2s ease;
 }
 
 .notes-table-container h2 {
