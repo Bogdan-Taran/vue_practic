@@ -13,6 +13,7 @@ Vue.component('task-card', {
         <div class="task-card" :class="{overdue: isOverdue}">
             <div v-if="!isEditing">
                 <h4>{{task.title}}</h4>
+                <p>Priority: {{task.priority}}</p?
                 <p class="task-description">{{task.description}}</p>
                 <div class="task-info">
                     <p><strong>Created:</strong> {{formatDate(task.createdAt)}}</p>
@@ -112,7 +113,7 @@ Vue.component('kanban-board', {
         <notification-popka :show="showNotification" :message="notificationMessage" :imageUrl="notificationImage" @close="hideNotification"></notification-popka>
         <div class="board-columns">
             <kanban-column
-                v-for="(column, index) in columns"
+                v-for="(column, index) in sortedByPriority"
                 :key="index"
                 :title="column.title"
                 :tasks="column.tasks"
@@ -126,7 +127,7 @@ Vue.component('kanban-board', {
             />
         </div>
         <add-task-form v-if="showAddForm" @add-task="addTask" @close="showAddForm = false" />
-        <button v-if="!showAddForm" @click="showAddForm = true" class="add-task-btn">Add task</button>
+        <button v-if="!showAddForm" @click="showAddForm = true" class="add-task-btn">+</button>
     </div>
     `,
     data(){
@@ -227,6 +228,22 @@ Vue.component('kanban-board', {
         hideNotification() {
             this.showNotification = false
         }
+    },
+    computed:{
+        sortedByPriority(){
+            const sortedColumns = this.columns.map(column =>{
+                const sortedTasks = [...column.tasks].sort((a, b) =>{
+                    if(a.priority === undefined) return 1
+                    if(b.priority === undefined) return -1  
+                    return a.priority - b.priority
+                })
+                return {
+                    ...column,
+                    tasks: sortedTasks
+                }
+            })
+            return sortedColumns
+        }
     }
 })
 
@@ -237,6 +254,15 @@ Vue.component('add-task-form', {
         <div class="add-task-form">
             <h3>Add new task</h3>
             <form @submit.prevent="submitTask">
+                <div class="form-group">
+                    <label for="task-priority">Priority</label>
+                    <input type="radio" name="task-priority" v-model="priority" value="1">1
+                    <input type="radio" name="task-priority" v-model="priority" value="2">2
+                    <input type="radio" name="task-priority" v-model="priority" value="3">3
+                    <input type="radio" name="task-priority" v-model="priority" value="4">4
+                    <input type="radio" name="task-priority" v-model="priority" value="5">5
+                </div>
+
                 <div class="form-group">
                     <label for="task-title">Title</label>
                     <input type="text" id="task-title" v-model="title" required class="form-control">
@@ -263,7 +289,8 @@ Vue.component('add-task-form', {
         return {
             title: '',
             description: '',
-            deadline: ''
+            deadline: '',
+            priority: null,
         }
     },
     methods: {
@@ -275,12 +302,15 @@ Vue.component('add-task-form', {
             const task = {
                 title: this.title,
                 description: this.description,
-                deadline: this.deadline
+                deadline: this.deadline,
+                priority: this.priority,
             }
+            console.log(task)
             this.$emit('add-task', task)
             this.title = ''
             this.description = ''
             this.deadline = ''
+            this.priority = ''
         }
     }
 })
