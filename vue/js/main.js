@@ -296,7 +296,7 @@ Vue.component('add-note', {
     template: `
     <div class="notes-adding">
             <form @submit.prevent="onSubmit">
-                <fieldset>
+                
                 
                 <h2>Add note</h2>
                 
@@ -332,7 +332,7 @@ Vue.component('add-note', {
                     
                 </ul>
                 <input type="submit" value="Submit">
-                <fieldset>
+                
                 
             </form>
         </div>
