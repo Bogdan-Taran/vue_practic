@@ -6,25 +6,25 @@ Vue.component('table-cards', {
     <div class="notes-table">
         <notification-popka :show="showNotification" :message="notificationMessage" :imageUrl="notificationImage" @close="hideNotification"></notification-popka>
         <div class="notes-table-container column1" :class="{locked: firstColumnLocked}">
-            <h2>{{columnsNotes[0].title}} ({{columnsNotes[0].notes.length}}/3)</h2>
+            <h2>{{filterNotesByPriority[0].title}} ({{filterNotesByPriority[0].notes.length}}/3)</h2>
             <div>
-                <li v-for="(note, index) in columnsNotes[0].notes" :key="index">
-                    <note-card :noteDetail="note" :columnIndex="0" :isLocked="firstColumnLocked" @move-to-column="handleMoveToColumn" @percentage-changed="checkFirstColumnLock"></note-card>
+                <li v-for="(note, index) in filterNotesByPriority[0].notes" :key="index">
+                    <note-card :noteDetail="note" :columnIndex="0" :isLockedWhenSecondColumnFull="firstColumnLocked" @move-to-column="handleMoveToColumn" @percentage-changed="checkFirstColumnLock"></note-card>
                 </li>
             </div>
         </div>
         <div class="notes-table-container column2">
-            <h2>{{columnsNotes[1].title}} ({{columnsNotes[1].notes.length}}/5)</h2>
+            <h2>{{filterNotesByPriority[1].title}} ({{filterNotesByPriority[1].notes.length}}/5)</h2>
             <div>
-                <li v-for="(note, index) in columnsNotes[1].notes" :key="index">
+                <li v-for="(note, index) in filterNotesByPriority[1].notes" :key="index">
                     <note-card :noteDetail="note" :columnIndex="1" @move-to-column="handleMoveToColumn"></note-card>
                 </li>
             </div>
         </div>
         <div class="notes-table-container column3">
-            <h2>{{columnsNotes[2].title}} ({{columnsNotes[2].notes.length}})</h2>
+            <h2>{{filterNotesByPriority[2].title}} ({{filterNotesByPriority[2].notes.length}})</h2>
             <div>
-                <li v-for="(note, index) in columnsNotes[2].notes" :key="index">
+                <li v-for="(note, index) in filterNotesByPriority[2].notes" :key="index">
                     <note-card :noteDetail="note" :columnIndex="2" :isDisabled="true" ></note-card>
                 </li>
             </div>
@@ -37,7 +37,7 @@ Vue.component('table-cards', {
                 {title: 'Column 1', notes: []},
                 {title: 'Column 2', notes: []},
                 {title: 'Column 3', notes: []}
-            ],
+            ],            
             firstColumnLocked: false,
             showNotification: false,
             notificationMessage: '',
@@ -74,6 +74,22 @@ Vue.component('table-cards', {
         },
         firstColumnLocked(){
             this.saveState()
+        }
+    },
+    computed: {
+        filterNotesByPriority(){
+            const sortedColumns = this.columnsNotes.map(column => {
+                const sortedNotes = [...column.notes].sort((a, b)=>{
+                    if(a.priority === undefined) return 1
+                    if(b.priority === undefined) return -1  
+                    return a.priority - b.priority
+                })
+                return {
+                    ...column,
+                    notes: sortedNotes
+                }
+            })
+            return sortedColumns
         }
     },
     // mounted() {
@@ -149,6 +165,8 @@ Vue.component('table-cards', {
     }
 })
 
+
+
 Vue.component('note-card', {
     props: {
         noteDetail:{
@@ -156,7 +174,7 @@ Vue.component('note-card', {
             required: false,
         },
         columnIndex: Number,
-        isLocked: Boolean,
+        isLockedWhenSecondColumnFull: Boolean,
         isDisabled: Boolean,
 
     },
@@ -164,24 +182,25 @@ Vue.component('note-card', {
     <div class="note">
         <ul class="note-list">
             <h3>{{noteDetail.title}}</h3>
+            <p>Priority: <strong>{{noteDetail.priority}}</strong> </p>
             <li :class="{completed: noteDetail.item1Checked}">
-                <input type="checkbox" :id="'note-item1-'+ _uid" v-model="noteDetail.item1Checked" :disabled="isLocked" :disabled="isDisabled">
+                <input type="checkbox" :id="'note-item1-'+ _uid" v-model="noteDetail.item1Checked" :disabled="isLockedWhenSecondColumnFull" :disabled="isDisabled">
                 <label :for="'note-item1-'+ _uid">{{noteDetail.item1}}</label>
             </li>
             <li :class="{completed: noteDetail.item2Checked}">
-                <input type="checkbox" :id="'note-item2-'+ _uid" v-model="noteDetail.item2Checked" :disabled="isLocked" :disabled="isDisabled">
+                <input type="checkbox" :id="'note-item2-'+ _uid" v-model="noteDetail.item2Checked" :disabled="isLockedWhenSecondColumnFull" :disabled="isDisabled">
                 <label :for="'note-item2-'+ _uid">{{noteDetail.item2}}</label>
             </li>
             <li :class="{completed: noteDetail.item3Checked}">
-                <input type="checkbox" :id="'note-item3-'+ _uid" v-model="noteDetail.item3Checked" :disabled="isLocked" :disabled="isDisabled">
+                <input type="checkbox" :id="'note-item3-'+ _uid" v-model="noteDetail.item3Checked" :disabled="isLockedWhenSecondColumnFull" :disabled="isDisabled">
                 <label :for="'note-item3-'+ _uid">{{noteDetail.item3}}</label>
             </li>
             <li v-if="noteDetail.item4" :class="{completed: noteDetail.item4Checked}">
-                <input type="checkbox" :id="'note-item4-'+ _uid" v-model="noteDetail.item4Checked" :disabled="isLocked" :disabled="isDisabled">
+                <input type="checkbox" :id="'note-item4-'+ _uid" v-model="noteDetail.item4Checked" :disabled="isLockedWhenSecondColumnFull" :disabled="isDisabled">
                 <label :for="'note-item4-'+ _uid">{{noteDetail.item4}}</label>
             </li>
             <li v-if="noteDetail.item5" :class="{completed: noteDetail.item5Checked}">
-                <input type="checkbox" :id="'note-item5-'+ _uid" v-model="noteDetail.item5Checked" :disabled="isLocked" :disabled="isDisabled">
+                <input type="checkbox" :id="'note-item5-'+ _uid" v-model="noteDetail.item5Checked" :disabled="isLockedWhenSecondColumnFull" :disabled="isDisabled">
                 <label :for="'note-item5-'+ _uid">{{noteDetail.item5}}</label>
             </li>
             <p class="progress-text">Completed: {{completionPercentage}}% </p>
@@ -241,9 +260,19 @@ Vue.component('add-note', {
     template: `
     <div class="notes-adding">
             <form @submit.prevent="onSubmit">
+                <fieldset>
+                
+                
                 <h2>Add note</h2>
+                
                 <label for="title">Title</label>
                 <input type="text" id="title" placeholder="title" v-model="title" :class="{inputNotFilled: isTitleNotFilled}">
+                <br>
+                <label for="priority">Priority</label>
+                <input type="radio" name="priority" value="1" v-model="priority">1
+                <input type="radio" name="priority" value="2" v-model="priority">2
+                <input type="radio" name="priority" value="3" v-model="priority" checked>3
+
                 <ul class="notes-adding-list">
                     <li>
                         <label for="item1">1</label>
@@ -268,6 +297,7 @@ Vue.component('add-note', {
                     
                 </ul>
                 <input type="submit" value="Submit">
+                <fieldset>
                 
             </form>
         </div>
@@ -275,6 +305,7 @@ Vue.component('add-note', {
     data() {
         return {
             title: null,
+            priority: null,
             item1: null,
             item2: null,
             item3: null,
@@ -318,6 +349,7 @@ Vue.component('add-note', {
             if (this.title && this.item1 && this.item2 && this.item3) {
                 let finalNote = {
                     title: this.title,
+                    priority: this.priority,
                     item1: this.item1,
                     item2: this.item2,
                     item3: this.item3,
@@ -334,6 +366,7 @@ Vue.component('add-note', {
                 eventBus.$emit('note-added', finalNote)
 
                 this.title = null
+                this.priority = "3"
                 this.item1 = null
                 this.item2 = null
                 this.item3 = null
