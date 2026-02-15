@@ -18,6 +18,11 @@ body {
     height: 80vh;
     flex: 1 1 calc(33.333% - 10px);
 }
+.add-note-container{
+    display: flex;
+    align-self: center;
+    justify-content: center;
+}
 
 .column1 {
     background-color: red;
@@ -54,6 +59,11 @@ body {
     pointer-events: none;
 }
 
+.note.lockedBecauseHavePriority{
+    opacity: 0.6;
+    pointer-events: none;
+}
+
 .notes-adding {
     align-self: center;
 }
@@ -66,6 +76,15 @@ input[type="text"].inputNotFilled {
     border: 2px solid red;
 }
 
+.priority-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    align-items: center;
+}
+
 
 
 
@@ -73,6 +92,7 @@ input[type="text"].inputNotFilled {
     align-self: center;
     background-color: aqua;
     width: 90%;
+    padding: 0 15px;
 }
 
 .note-list,

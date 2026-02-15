@@ -3,30 +3,36 @@ let eventBus = new Vue()
 
 Vue.component('table-cards', {
     template: `
-    <div class="notes-table">
-        <notification-popka :show="showNotification" :message="notificationMessage" :imageUrl="notificationImage" @close="hideNotification"></notification-popka>
-        <div class="notes-table-container column1" :class="{locked: firstColumnLocked}">
-            <h2>{{filterNotesByPriority[0].title}} ({{filterNotesByPriority[0].notes.length}}/3)</h2>
-            <div>
-                <li v-for="(note, index) in filterNotesByPriority[0].notes" :key="index">
-                    <note-card :noteDetail="note" :columnIndex="0" :isLockedWhenSecondColumnFull="firstColumnLocked" @move-to-column="handleMoveToColumn" @percentage-changed="checkFirstColumnLock"></note-card>
-                </li>
-            </div>
+    <div>
+        <div class="add-note-container">
+            <add-note :havePriorityNote="havePriorityNote"></add-note>
         </div>
-        <div class="notes-table-container column2">
-            <h2>{{filterNotesByPriority[1].title}} ({{filterNotesByPriority[1].notes.length}}/5)</h2>
-            <div>
-                <li v-for="(note, index) in filterNotesByPriority[1].notes" :key="index">
-                    <note-card :noteDetail="note" :columnIndex="1" @move-to-column="handleMoveToColumn"></note-card>
-                </li>
+        <div class="notes-table">
+            
+            <notification-popka :show="showNotification" :message="notificationMessage" :imageUrl="notificationImage" @close="hideNotification"></notification-popka>
+            <div class="notes-table-container column1" :class="{locked: firstColumnLocked}">
+                <h2>{{filterNotesByPriority[0].title}} ({{filterNotesByPriority[0].notes.length}}/3)</h2>
+                <div>
+                    <li v-for="(note, index) in filterNotesByPriority[0].notes" :key="index">
+                        <note-card :havePriorityNote="havePriorityNote" :index="index" :noteDetail="note" :columnIndex="0" :isLockedWhenSecondColumnFull="firstColumnLocked" @move-to-column="handleMoveToColumn" @percentage-changed="checkFirstColumnLock"></note-card>
+                    </li>
+                </div>
             </div>
-        </div>
-        <div class="notes-table-container column3">
-            <h2>{{filterNotesByPriority[2].title}} ({{filterNotesByPriority[2].notes.length}})</h2>
-            <div>
-                <li v-for="(note, index) in filterNotesByPriority[2].notes" :key="index">
-                    <note-card :noteDetail="note" :columnIndex="2" :isDisabled="true" ></note-card>
-                </li>
+            <div class="notes-table-container column2">
+                <h2>{{filterNotesByPriority[1].title}} ({{filterNotesByPriority[1].notes.length}}/5)</h2>
+                <div>
+                    <li v-for="(note, index) in filterNotesByPriority[1].notes" :key="index">
+                        <note-card :havePriorityNote="havePriorityNote" :index="index" :noteDetail="note" :columnIndex="1" @move-to-column="handleMoveToColumn"></note-card>
+                    </li>
+                </div>
+            </div>
+            <div class="notes-table-container column3">
+                <h2>{{filterNotesByPriority[2].title}} ({{filterNotesByPriority[2].notes.length}})</h2>
+                <div>
+                    <li v-for="(note, index) in filterNotesByPriority[2].notes" :key="index">
+                        <note-card :havePriorityNote="havePriorityNote" :noteDetail="note" :columnIndex="2" :isDisabled="true" ></note-card>
+                    </li>
+                </div>
             </div>
         </div>
     </div>
@@ -37,7 +43,8 @@ Vue.component('table-cards', {
                 {title: 'Column 1', notes: []},
                 {title: 'Column 2', notes: []},
                 {title: 'Column 3', notes: []}
-            ],            
+            ],
+            havePriorityNote: false,
             firstColumnLocked: false,
             showNotification: false,
             notificationMessage: '',
@@ -63,6 +70,14 @@ Vue.component('table-cards', {
         })
         eventBus.$on('show-notification', (message) =>{
             this.showNotificationMessage(message, 'src/imgs/warn3_image.png')
+        })
+        eventBus.$on('someNoteBecomePriority', (noteDetail) =>{
+            console.log('Это правда, какая-то заметка стала приоритетной', noteDetail)
+            this.havePriorityNote = true
+        })
+        eventBus.$on('someNoteLostPriority', (noteDetail) =>{
+            console.log('Это правда, какая-то заметка перестала быть приоритетной', noteDetail)
+            this.havePriorityNote = false
         })
     },
     watch: {
@@ -173,16 +188,21 @@ Vue.component('note-card', {
             type: Object,
             required: false,
         },
+        index: String,
         columnIndex: Number,
         isLockedWhenSecondColumnFull: Boolean,
         isDisabled: Boolean,
+        havePriorityNote: Boolean,
 
     },
     template: `
-    <div class="note">
+    <div class="note" :class="{lockedBecauseHavePriority: havePriorityNote && !this.noteDetail.isPriorityNote}">
         <ul class="note-list">
             <h3>{{noteDetail.title}}</h3>
-            <p>Priority: <strong>{{noteDetail.priority}}</strong> </p>
+            <div class="priority-container">
+                <p>Priority: <strong>{{noteDetail.priority}}</strong> </p>
+                <button type="button" v-if="columnIndex !== 2" v-on:click="makeNotePriority"><img src="src/svg/star_priority_button.svg" alt="Иконка" width="50" height="50"> Сделать приоритетом</button>
+            </div>
             <li :class="{completed: noteDetail.item1Checked}">
                 <input type="checkbox" :id="'note-item1-'+ _uid" v-model="noteDetail.item1Checked" :disabled="isLockedWhenSecondColumnFull" :disabled="isDisabled">
                 <label :for="'note-item1-'+ _uid">{{noteDetail.item1}}</label>
@@ -231,10 +251,16 @@ Vue.component('note-card', {
             if(total === 0) return 0
             return Math.round((completed / total) * 100)
         }
+        
     },
     watch: {
         completionPercentage(newVal){
             this.$emit('percentage-changed')
+            if(newVal >= 100){
+                this.noteDetail.isPriorityNote = false
+                this.noteDetail.id = this.index
+                eventBus.$emit('someNoteLostPriority', this.noteDetail)
+            }
             if(this.columnIndex === 0){
                 if(newVal > 50){
                     this.$emit('move-to-column', this.noteDetail, 1)
@@ -245,11 +271,18 @@ Vue.component('note-card', {
                     this.$emit('move-to-column', this.noteDetail, 2)
                 }
             }
-        }
+        },
     },
     methods:{
         formatDate(date){
             return date.toLocaleString()
+        },
+        makeNotePriority(){
+            this.noteDetail.isPriorityNote = true
+            this.noteDetail.id = this.index
+            console.log('заметка теперь приоритетная')
+            eventBus.$emit('someNoteBecomePriority', this.noteDetail)
+            
         }
     }
 
@@ -257,42 +290,44 @@ Vue.component('note-card', {
 
 
 Vue.component('add-note', {
+    props:{
+        havePriorityNote: Boolean,
+    },
     template: `
     <div class="notes-adding">
             <form @submit.prevent="onSubmit">
                 <fieldset>
                 
-                
                 <h2>Add note</h2>
                 
                 <label for="title">Title</label>
-                <input type="text" id="title" placeholder="title" v-model="title" :class="{inputNotFilled: isTitleNotFilled}">
+                <input type="text" id="title" placeholder="title" :disabled="havePriorityNote" v-model="title" :class="{inputNotFilled: isTitleNotFilled}">
                 <br>
                 <label for="priority">Priority</label>
-                <input type="radio" name="priority" value="1" v-model="priority">1
-                <input type="radio" name="priority" value="2" v-model="priority">2
-                <input type="radio" name="priority" value="3" v-model="priority" checked>3
+                <input type="radio" name="priority" value="1" v-model="priority" :disabled="havePriorityNote">1
+                <input type="radio" name="priority" value="2" v-model="priority" :disabled="havePriorityNote">2
+                <input type="radio" name="priority" value="3" v-model="priority" checked :disabled="havePriorityNote">3
 
                 <ul class="notes-adding-list">
                     <li>
                         <label for="item1">1</label>
-                        <input type="text" id="item1" v-model="item1" :class="{inputNotFilled: isItem1NotFilled}">
+                        <input type="text" id="item1" :disabled="havePriorityNote" v-model="item1" :class="{inputNotFilled: isItem1NotFilled}">
                     </li>
                     <li>
                         <label for="item2">2</label>
-                        <input type="text" id="item2" v-model="item2" :class="{inputNotFilled: isItem2NotFilled}">
+                        <input type="text" id="item2" :disabled="havePriorityNote" v-model="item2" :class="{inputNotFilled: isItem2NotFilled}">
                     </li>
                     <li>
                         <label for="item3">3</label>
-                        <input type="text" id="item3" v-model="item3" :class="{inputNotFilled: isItem3NotFilled}">
+                        <input type="text" id="item3" :disabled="havePriorityNote" v-model="item3" :class="{inputNotFilled: isItem3NotFilled}">
                     </li>
                     <li v-if="item1 && item2 && item3">
                         <label for="item4">4</label>
-                        <input type="text" id="item4" v-model="item4">
+                        <input type="text" id="item4" :disabled="havePriorityNote" v-model="item4">
                     </li>
                     <li v-if="item1 && item2 && item3 && item4">
                         <label for="item5">5</label>
-                        <input type="text" id="item5" v-model="item5">
+                        <input type="text" id="item5" :disabled="havePriorityNote" v-model="item5">
                     </li>
                     
                 </ul>
@@ -304,8 +339,10 @@ Vue.component('add-note', {
     `,
     data() {
         return {
+            id: null,
             title: null,
             priority: null,
+            isPriorityNote: false,
             item1: null,
             item2: null,
             item3: null,
