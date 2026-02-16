@@ -11,10 +11,18 @@ Vue.component('task-card', {
     },
     template: `
         <div class="task-card"
-        :class="{overdue: isOverdue}">
+        :class="{overdue: isOverdue, dragging: isDragging}"
+        draggable="true"
+        @dragstart="handleDragStart"
+        @dragend="handleDragEnd"
+        @dragover.prevent
+        @dragenter="handleDragEnter"
+        @dragleave="handleDragLeave"
+        @drop="handleDrop"
+        >
             <div v-if="!isEditing">
                 <h4>{{task.title}}</h4>
-                <p>Priority: {{task.priority}}</p?
+                <p>Priority: {{task.priority}}</p>
                 <p class="task-description">{{task.description}}</p>
                 <div class="task-info">
                     <p><strong>Created:</strong> {{formatDate(task.createdAt)}}</p>
@@ -58,7 +66,8 @@ Vue.component('task-card', {
         return{
             editedTask:{
                 ...this.task
-            }
+            },
+            isDragging: false
         }
     },
     computed: {
@@ -68,6 +77,24 @@ Vue.component('task-card', {
         }
     },
     methods: {
+        handleDragStart(event) {
+            event.dataTransfer.setData('taskId', this.task.id)
+            event.dataTransfer.setData('sourceColumn', this.columnIndex.toString())
+            event.dataTransfer.effectAllowed = 'move'
+            this.isDragging = true
+        },
+        handleDragEnd() {
+            this.isDragging = false
+        },
+        handleDragEnter(event) {
+            event.target.classList.add('drag-over')
+        },
+        handleDragLeave(event) {
+            event.target.classList.remove('drag-over')
+        },
+        handleDrop(event) {
+            event.target.classList.remove('drag-over')
+        },
         formatDate(date){
             if(!date) return ''
             return new Date(date).toLocaleString()
@@ -90,7 +117,6 @@ Vue.component('task-card', {
     }
 })
 
-
 Vue.component('kanban-column', {
     props: {
         title: String,
@@ -99,13 +125,45 @@ Vue.component('kanban-column', {
         editingTaskId: String,
     },
     template: `
-    <div class="kanban-column">
+    <div class="kanban-column"
+         @dragover.prevent="handleDragOver"
+         @dragenter="handleDragEnter"
+         @dragleave="handleDragLeave"
+         @drop="handleDrop"
+         :class="{ 'drag-over': isDragOver }">
         <h3>{{title}} ({{tasks.length}})</h3>
         <div class="tasks-container">
             <task-card v-for="task in tasks" :key="task.id" :task="task" :column-index="columnIndex" :isEditing="editingTaskId === task.id" @edit="$emit('start-edit', task.id)" @delete="$emit('delete-task', task.id)" @move="$emit('move-task', task.id, $event)" @update-task="$emit('update-task', $event)" @cancel-edit="$emit('cancel-edit')"/>
         </div>
     </div>
-    `
+    `,
+    data() {
+        return {
+            isDragOver: false
+        }
+    },
+    methods: {
+        handleDragOver(event) {
+            event.preventDefault()
+        },
+        handleDragEnter(event) {
+            this.isDragOver = true
+        },
+        handleDragLeave(event) {
+            if (!event.currentTarget.contains(event.relatedTarget)) {
+                this.isDragOver = false
+            }
+        },
+        handleDrop(event) {
+            this.isDragOver = false
+            const taskId = event.dataTransfer.getData('taskId')
+            const sourceColumn = parseInt(event.dataTransfer.getData('sourceColumn'))
+            
+            if (taskId && sourceColumn !== null) {
+                this.$emit('task-dropped', taskId, sourceColumn, this.columnIndex)
+            }
+        }
+    }
 })
 
 Vue.component('kanban-board', {
@@ -125,6 +183,7 @@ Vue.component('kanban-board', {
                 @move-task="moveTask"
                 @update-task="updateTask"
                 @cancel-edit="editingTaskId = null"
+                @task-dropped="handleTaskDropped"
             />
         </div>
         <add-task-form v-if="showAddForm" @add-task="addTask" @close="showAddForm = false" />
@@ -228,6 +287,47 @@ Vue.component('kanban-board', {
         },
         hideNotification() {
             this.showNotification = false
+        },
+        handleTaskDropped(taskId, sourceColumnIndex, targetColumnIndex) {
+            let isValidMove = false
+            if (sourceColumnIndex === 0 && targetColumnIndex === 1) {
+                isValidMove = true
+            }
+            else if (sourceColumnIndex === 1 && targetColumnIndex === 2) {
+                isValidMove = true
+            }
+            else if (sourceColumnIndex === 2 && (targetColumnIndex === 3 || targetColumnIndex === 1)) {
+                isValidMove = true
+                if (targetColumnIndex === 1) {
+                    const reason = prompt('Enter reason for returning to work:')
+                    if (reason === null) return
+                    const sourceColumn = this.columns[sourceColumnIndex]
+                    const taskIndex = sourceColumn.tasks.findIndex(t => t.id === taskId)
+                    if (taskIndex !== -1) {
+                        sourceColumn.tasks[taskIndex].returnReason = reason
+                    }
+                }
+            }
+            else if (sourceColumnIndex === 2 && targetColumnIndex === 3) {
+                isValidMove = true
+            }
+            if (!isValidMove) {
+                this.showNotificationMessage(`Перемешение из "${this.columns[sourceColumnIndex].title}" в "${this.columns[targetColumnIndex].title}" запрещено!`)
+                return
+            }
+    
+            let task = null
+            const sourceColumn = this.columns[sourceColumnIndex]
+            const taskIndex = sourceColumn.tasks.findIndex(t => t.id === taskId)
+            
+            if (taskIndex !== -1) {
+                task = sourceColumn.tasks.splice(taskIndex, 1)[0]
+                
+                if (targetColumnIndex === 3) {
+                    task.completedAt = new Date().toISOString()
+                }
+                this.columns[targetColumnIndex].tasks.push(task)
+            }
         }
     },
     computed:{
@@ -247,7 +347,6 @@ Vue.component('kanban-board', {
         }
     }
 })
-
 
 Vue.component('add-task-form', {
     template: `
@@ -316,8 +415,6 @@ Vue.component('add-task-form', {
     }
 })
 
-
-
 Vue.component('notification-popka', {
     props: {
         show: Boolean,
@@ -342,7 +439,6 @@ Vue.component('notification-popka', {
         }
     }
 })
-
 
 let app = new Vue({
     el: '#app',

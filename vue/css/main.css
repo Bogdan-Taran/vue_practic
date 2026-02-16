@@ -65,12 +65,14 @@ body {
 .task-card h4 {
     margin: 0 0 10px 0;
     color: #333;
+    overflow-wrap: break-word;
 }
 
 .task-description {
     font-size: 14px;
     color: #666;
     margin: 5px 0;
+    overflow-wrap: break-word;
 }
 
 .task-info p {
@@ -381,4 +383,27 @@ input[type="text"].inputNotFilled {
     to {
         transform: translateY(-100%);
     }
+}
+
+.task-card.dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
+}
+
+.task-card.drag-over {
+    border: 2px dashed #007acc;
+    background-color: #f0f8ff;
+}
+
+.kanban-column.drag-over {
+    background-color: #d6e4ff;
+    border: 2px dashed #007acc;
+}
+
+.task-card {
+    transition: all 0.2s ease;
+}
+
+.kanban-column {
+    transition: all 0.2s ease;
 }
