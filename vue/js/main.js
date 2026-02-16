@@ -110,7 +110,7 @@ Vue.component('task-card', {
         returnToWork(){
             const reason = prompt('Enter reason for returning to work')
             if(reason !== null){
-                const updatedTask = {...this.task, returnReason: reason}
+                const updatedTask = {...this.task, returnReason: reason, editedAt: new Date().toISOString()}
                 this.$emit('move', 1, updatedTask)
             }
         }, 
@@ -268,6 +268,7 @@ Vue.component('kanban-board', {
             this.editingTaskId = null
         },
         updateTask(updatedTask){
+            updatedTask.editedAt = new Date().toISOString()
             for(let i =0; i< this.columns.length; i++){
                 const taskIndex = this.columns[i].tasks.findIndex(t => t.id === updatedTask.id)
                 if(taskIndex !== -1){
@@ -305,6 +306,7 @@ Vue.component('kanban-board', {
                     const taskIndex = sourceColumn.tasks.findIndex(t => t.id === taskId)
                     if (taskIndex !== -1) {
                         sourceColumn.tasks[taskIndex].returnReason = reason
+                        sourceColumn.tasks[taskIndex].editedAt = new Date().toISOString()
                     }
                 }
             }
