@@ -10,7 +10,8 @@ Vue.component('task-card', {
         isEditing: Boolean
     },
     template: `
-        <div class="task-card" :class="{overdue: isOverdue}">
+        <div class="task-card"
+        :class="{overdue: isOverdue}">
             <div v-if="!isEditing">
                 <h4>{{task.title}}</h4>
                 <p>Priority: {{task.priority}}</p?
@@ -85,7 +86,7 @@ Vue.component('task-card', {
                 const updatedTask = {...this.task, returnReason: reason}
                 this.$emit('move', 1, updatedTask)
             }
-        }
+        }, 
     }
 })
 
